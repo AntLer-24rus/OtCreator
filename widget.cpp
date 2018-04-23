@@ -2,27 +2,17 @@
 #include "ui_widget.h"
 
 
-Widget::Widget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::Widget)
+Widget::Widget(QAxObject *wordIn, QWidget *parent) : QWidget(parent), ui(new Ui::Widget)
 {
+    qDebug() << "Create Widget instanse";
     ui->setupUi(this);
-    word = new QAxObject(this);
-    bool controlLoaded = word->setControl("Word.Application");
-    if (!controlLoaded)
-    {
-
-        // Message about control didn't load
-    }
-    else
-    {
+    word = wordIn;
         // Control loaded OK; connecting to catch exceptions from control
         word->setProperty("Visible", true);
         word->blockSignals(false);
         connect(word, SIGNAL(exception(int, const QString &, const QString &, const QString &)),
                 this,
                 SLOT(onWordException(int, const QString &, const QString &, const QString &)));
-    }
 }
 
 Widget::~Widget()
@@ -38,9 +28,9 @@ void Widget::onWordException(int code, const QString &source, const QString &des
     QMessageBox::warning(this, tr("OtCreator"),
                          "Критическая ошибка\n"
                          "Код: " + QString::number(code) + "\n"
-                                                           "Источник: " + source + "\n"
-                                                                                   "desc: " + desc + "\n"
-                                                                                                     "Помощь: " + help);
+                         "Источник: " + source + "\n"
+                         "desc: " + desc + "\n"
+                         "Помощь: " + help);
     word->dynamicCall("Quit(Boolean)", false);
     word->clear();
     delete word;
